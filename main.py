@@ -69,7 +69,7 @@ def init():
         all_news.append(singleNews)
 
     print(dates, "\n", pics, "\n", title, "\n", all_news)
-
+    # ensure_ascii=False позволяет записывать русские символы в файл
     jsonList = json.dumps(all_news, default=obj_dict, ensure_ascii=False)
     print(jsonList)
 
@@ -77,9 +77,8 @@ def init():
         outfile.write(jsonList)
 
 
+# regular исследование регулярных выражений
 def regular():
-    # ДОМЕНЫ ПОЧТ
-
     # найдём знак '@'.
     # '\w' - любая буква(то, что может быть частью слова);
     # '+' - не менее 1 знака и более;
@@ -134,9 +133,48 @@ def regular():
     print(new_data['best_price'])
 
 
+def formatter():
+    # Преобразование текстового файла в формат csv
+    saveData = []
+    with open("formatter.txt", "rt") as inFile:
+        rawData = inFile.readlines()[0:10]
+        for line in rawData:
+            # Присутствуют строковые значения int(v) замнен на str(v)
+            row = [str(v) for v in line.split('\t')]
+            # [:-1] удаление конца строки (\n)
+            saveData.append(row[:-1])
+
+    # Создание, запись с заполнением и сохранение файла csv, разделитель ","
+    with open("formatter.csv", "wt", newline='') as csvOut:
+        # Создаем объект, делиметр ","
+        csvWriter = csv.writer(csvOut, delimiter=",")
+        # Запись строк
+        for row in saveData:
+            csvWriter.writerow(row)
+
+    # Преобразование csv файла в формат json
+
+    myData = {}
+
+    with open("formatter.csv", "rt") as csvfile:
+        csvRead = csv.DictReader(csvfile)
+        for rows in csvRead:
+            # Ключ словаря
+            myKey = rows['time']
+            # заполнение элементов словаря по ключу
+            myData[myKey] = rows
+
+    # Создание, запись и сохранение файла формата json
+    with open("formatter.json", "wt", encoding="utf-8") as jsonfile:
+        # ensure_ascii=False позволяет записывать русские символы в файл
+        jsonfile.write(json.dumps(myData, indent=4, ensure_ascii=False))
+
+
 # Starting script here.
 if __name__ == '__main__':
     init()
     time.sleep(2)
     regular()
+    time.sleep(2)
+    formatter()
     time.sleep(2)
