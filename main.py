@@ -1,5 +1,9 @@
 import time
 import json
+import csv
+import re
+
+import pandas as pn
 
 from bs4 import BeautifulSoup
 import requests
@@ -40,7 +44,7 @@ def init():
     news = soup.find_all('div', class_='col-md-4 col-sm-6 item')
     print(news)
 
-    # по большому счету сейчас в этих слайсах нет необходимости, сделаны для тестов.
+    # по большому счету в этих слайсах нет необходимости, сделаны для тестов.
     pics = []
     tags = []
     dates = []
@@ -57,21 +61,82 @@ def init():
         print(data.find('a', class_='brand-link'))
         dates.append(data.find('p', class_='date').text)
         print(data.find('p', class_='date'))
-        print(data.find('a',class_='label-success').text)
-        tags.append(data.find('a',class_='label-success').text)
-        singleNews = News(data.find('a', class_='brand-link').text, data.find('a',class_='label-success').text, pic['src'], data.find('p', class_='date').text)
+        print(data.find('a', class_='label-success').text)
+        tags.append(data.find('a', class_='label-success').text)
+        singleNews = News(data.find('a', class_='brand-link').text, data.find('a', class_='label-success').text,
+                          pic['src'], data.find('p', class_='date').text)
         print(singleNews)
         all_news.append(singleNews)
 
     print(dates, "\n", pics, "\n", title, "\n", all_news)
 
-    jsonList = json.dumps(all_news,default=obj_dict, ensure_ascii=False)
+    jsonList = json.dumps(all_news, default=obj_dict, ensure_ascii=False)
     print(jsonList)
 
     with open('json_data.json', 'w') as outfile:
         outfile.write(jsonList)
 
+
+def regular():
+    # ДОМЕНЫ ПОЧТ
+
+    # найдём знак '@'.
+    # '\w' - любая буква(то, что может быть частью слова);
+    # '+' - не менее 1 знака и более;
+    # Ищем знак '.'
+    text = 'glebik000@gmail.com, glebov.evgeniy1@edu.vvsu.ru, glebik000@mail.ru, test-email@ya.list.ru'
+    result = re.findall(r'@\w+.\w+.\w+', text)
+    print(result)
+
+    # Проверка корректности вводимого пароля
+    correct = 'TESTpass!1'
+    incorrect = 'testpas2'
+
+    # (?=.*[0-9]) - строка содержит хотя бы одно число;
+    # (?=.*[a-z]) - строка содержит хотя бы одну латинскую букву в нижнем регистре;
+    # (?=.*[A-Z]) - строка содержит хотя бы одну латинскую букву в верхнем регистре;
+    # [0-9a-zA-Z@#%^!$]{8,} - строка состоит не менее, чем из 8 перечисленных символов.
+    result = re.findall(r'^(?=.*[0-9].*)(?=.*[a-z].*)(?=.*[A-Z].*)[0-9a-zA-Z@#%^!$]{8,}', correct)
+    print(result)
+
+    result = re.findall(r'^(?=.*[0-9].*)(?=.*[a-z].*)(?=.*[A-Z].*)[0-9a-zA-Z@#%^!$]{8,}', incorrect)
+    print(result)
+
+    # Разбор строки по разделителям
+    text = 'asd,sadf,sADF;sdfasxcl asddcaaed;saxadf,aszxa,aszx'
+    # \s - любой пробелльный символ;
+    # [] - один из символов в скобках.
+    result = re.split(r'[;,\s]', text)
+    print(result)
+
+    new_data = pn.read_csv('phones_data.csv')
+
+    # Преобразование даты
+    counter = 0
+    for i in new_data['release_date']:
+        if counter > 10:
+            break
+        result = re.sub(r'[-]', '.', str(i))
+        counter = counter + 1
+        print(result)
+
+    print(new_data['release_date'])
+
+    # Преобразование числа
+    counter = 0
+    for i in new_data['best_price']:
+        if counter > 10:
+            break
+        result = re.sub(r'[.]', ',', str(i))
+        counter = counter + 1
+        print(result)
+
+    print(new_data['best_price'])
+
+
 # Starting script here.
 if __name__ == '__main__':
     init()
+    time.sleep(2)
+    regular()
     time.sleep(2)
