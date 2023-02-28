@@ -40,6 +40,7 @@ def init():
     news = soup.find_all('div', class_='col-md-4 col-sm-6 item')
     print(news)
 
+    # по большому счету сейчас в этих слайсах нет необходимости, сделаны для тестов.
     pics = []
     tags = []
     dates = []
